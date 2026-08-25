@@ -1,0 +1,7 @@
+icm_version: 1
+form: pipeline # pipeline | umbrella | record-library | knowledge-bundle | context-map | system-map
+entrypoint: AGENTS.md
+run_policy: single # single | isolated
+human_gate: required # required | risk-based | none
+max_entry_lines: 60
+max_context_tokens: 8000

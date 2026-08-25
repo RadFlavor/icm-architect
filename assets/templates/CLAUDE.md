@@ -19,9 +19,9 @@ Built on ICM: folders carry sequencing, hierarchy carries context, files carry s
 |---|---|---|
 | starting a new run | `stages/01_.../CONTEXT.md` | human reads the output |
 | {previous stage} output approved | next numbered stage | human reads the output |
-| asked for status | scan `stages/*/output/` | report what exists |
+| asked for status | inspect output metadata or `runs/*/RUN.md` | report present, approved, stale, and blocked separately |
 | setting up for a new user | `setup/questionnaire.md` | answers written to `_shared/` |
 
 ## The one rule
 
-Nothing moves to the next stage until a person has read the output of the last one.
+Follow the gate policy in `icm.yaml`. Required gates do not move until a person approves the prior output; risk-based auto gates must be explicitly justified in the stage contract.

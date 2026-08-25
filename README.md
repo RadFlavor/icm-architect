@@ -20,6 +20,13 @@ Six forms, one skeleton: **Pipeline** (production line), **Umbrella** (portfolio
 
 Every result is validated with the **walk test**: an agent with no memory must orient, act, and report status from the files alone.
 
+Repeated or audited workspaces can add the optional reliability layer: `icm.yaml`, isolated runs, artifact provenance and approval state, explicit exceptions, and a dependency-free checker that detects contract gaps, broken paths, entry-file drift, stale artifacts, and invalid run state.
+
+```bash
+python3 scripts/icm_check.py /path/to/workspace
+python3 scripts/icm_check.py /path/to/workspace --strict
+```
+
 ## Install
 
 **Claude Code:** copy this folder to `~/.claude/skills/icm-architect/` (or `.claude/skills/icm-architect/` inside a project), then ask Claude to "ICM this" / "structure this for agents" / "build me a workspace for X".
@@ -34,9 +41,11 @@ icm-architect/
 ├─ references/
 │  ├─ core.md            five principles, five-layer hierarchy, naming, token discipline
 │  ├─ forms.md           the six forms in depth: skeletons, moves, failure modes
-│  └─ system-map.md      audit pipeline for the System map form
-└─ assets/templates/     copyable starters: CLAUDE.md, CONTEXT.md, stage contract,
-                         node card, object/process cards, schema, questionnaire
+│  ├─ system-map.md      audit pipeline for the System map form
+│  └─ reliability.md     runs, provenance, gates, exceptions, checker contract
+├─ scripts/
+│  └─ icm_check.py       read-only, dependency-free workspace validator
+└─ assets/templates/     copyable catalogs, contracts, manifests, artifacts, and cards
 ```
 
 MIT licensed, like the protocol it serves.

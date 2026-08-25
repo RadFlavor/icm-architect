@@ -20,10 +20,10 @@ Every ICM, whatever its form, obeys these. When building or restructuring, enfor
 3. **Numbering encodes order.** `01_`, `02_`, … where sequence matters. Renaming folders reorders the pipeline — that is the point.
 4. **Every folder-level contract is explicit.** A `CONTEXT.md` per working folder: what it reads (inputs), what it does (process), what it writes (outputs), what a human checks. See [assets/templates/stage-CONTEXT.md](assets/templates/stage-CONTEXT.md).
 5. **Factory vs. product.** Reference material (rules, voice, schemas, templates — stable across runs) lives structurally apart from working artifacts (outputs, drafts — new every run). Configure the factory once; the product is what each run emits.
-6. **Every output is an edit surface.** Intermediate outputs are plain files a human can open, edit, and save before the next step reads them. Nothing moves forward until a person has read the last output.
+6. **Every output is an edit surface.** Intermediate outputs have a human-readable control surface a person can inspect and revise. Consequential handoffs stop at the declared gate; low-risk deterministic stages may auto-advance only under an explicit risk-based policy.
 7. **Load only what the step needs.** An agent executing a step reads its contract, its references, and its inputs — not the whole workspace. 2,000–8,000 tokens per step is the healthy range.
-8. **Plain text, linkable, queryable.** Markdown + YAML frontmatter. Links (`[[wikilinks]]` or relative paths) make it a graph; frontmatter labels make it queryable. One home per fact — a link beats a copy.
-9. **The filesystem is the state machine.** "Status" is derivable by scanning what exists in output folders. Generated indexes (file maps, logs) are rebuilt by script, never hand-edited.
+8. **Plain text control surface, linkable and queryable.** Markdown + YAML frontmatter carry control state. Links (`[[wikilinks]]` or relative paths) make it a graph; frontmatter labels make it queryable. Large or binary payloads may use appropriate storage beside a plain-text descriptor. One home per fact — a link beats a copy.
+9. **The filesystem is the state machine.** Files plus explicit metadata carry state. Presence is not approval: consequential artifacts distinguish draft, approved, superseded, and stale. Generated indexes (file maps, logs) are rebuilt by script, never hand-edited.
 10. **Instantiate by copying.** New unit of work = copy a template folder, not a blank page. Keep templates in a `_templates/` or `_system/` folder.
 
 ## Choose a mode
@@ -59,9 +59,11 @@ Real workspaces mix forms (a record library whose records are mini knowledge bun
 
 **3. Scaffold the smallest structure that carries the work.** Copy starters from [assets/templates/](assets/templates/) and fill them in. Do not create folders for stages that don't exist yet, empty "misc" buckets, or speculative depth. Three real stages beat seven imagined ones. If the whole job fits in one saved prompt, say so and don't build a workspace at all.
 
-**4. Write the contracts.** Root `CLAUDE.md` (identity + routing table), root `CONTEXT.md` (the pipeline or schema definition), one `CONTEXT.md` per stage/hub folder, `setup/questionnaire.md` if the factory needs configuring per user. Write inputs as explicit file paths, split into working (this run) and reference (every run).
+**4. Write the contracts.** Root `AGENTS.md` or `CLAUDE.md` (identity + routing table), root `CONTEXT.md` (the pipeline or schema definition), one `CONTEXT.md` per stage/hub folder, `setup/questionnaire.md` if the factory needs configuring per user. Write inputs as explicit file paths, split into working (this run) and reference (every run). Pick one canonical entry filename; any compatibility twin is generated or a pointer.
 
-**5. Validate with the walk test** (below).
+**5. Add reliability only when earned.** For repeated, shared, or auditable workspaces, read [references/reliability.md](references/reliability.md), add `icm.yaml`, choose a run policy and gate policy, and use provenance metadata. Keep one-off workspaces lighter.
+
+**6. Validate.** Run the walk test below. When the reliability layer is present—or the user asks for a checker—run `python3 scripts/icm_check.py <workspace>` and resolve errors before handoff.
 
 ## Restructure mode
 
@@ -80,7 +82,7 @@ Real workspaces mix forms (a record library whose records are mini knowledge bun
 
 **5. Migrate.** Move files, write the entry file and contracts, de-duplicate toward one-home-per-fact (leave a link where the copy lived if anything might reference it). Separate method from instance: if the structure will be reused elsewhere, the blank template lives apart from this filled-in deployment.
 
-**6. Validate with the walk test.**
+**6. Validate with the walk test.** Add the reliability layer and checker when the migrated workspace repeats, is shared, or needs an audit trail.
 
 ## The walk test
 
@@ -88,7 +90,7 @@ Validate any ICM — new or restructured — by walking it cold, as an agent wit
 
 - Open the root. Can you answer *where am I* and *where do I go for the current task* within the entry file plus at most two more reads?
 - Pick any stage/node. Does its contract name exact input paths, the job, the output, and the human check?
-- Can you state pipeline status purely by scanning what exists in `output/` folders (or node frontmatter)?
+- Can you distinguish present, approved, stale, blocked, and superseded work from files and metadata alone?
 - Is any routing file carrying content payload? Move the payload to a shelf; leave a pointer.
 - Is any fact stored in two places? Pick one home; link from the other.
 - Token check: entry file + one contract + its inputs should land in roughly 2k–8k tokens.
@@ -107,4 +109,6 @@ If a step fails, fix the structure — not by explaining more, but by moving or 
 - [references/core.md](references/core.md) — the five design principles, the five-layer context hierarchy, naming conventions, token discipline. Read when writing contracts or when a structural call is contested.
 - [references/forms.md](references/forms.md) — the six forms in depth: skeletons, moves, failure modes. Read at step 2 of Build mode or step 2 of Restructure mode.
 - [references/system-map.md](references/system-map.md) — audit pipeline for the System map form. Read when that form is chosen.
-- [assets/templates/](assets/templates/) — copyable starters: `CLAUDE.md`, workspace `CONTEXT.md`, `stage-CONTEXT.md`, `node.md`, `object.md`, `process.md`, `schema.md`, `questionnaire.md`.
+- [references/reliability.md](references/reliability.md) — run isolation, provenance, approval/staleness, exceptions, and checker use. Read for repeated, shared, audited, or checker-backed workspaces.
+- [assets/templates/](assets/templates/) — copyable starters for catalogs, contracts, manifests, runs, artifacts, exceptions, cards, schemas, and setup.
+- [scripts/icm_check.py](scripts/icm_check.py) — read-only structural and state validator; run after building or changing a reliability-enabled ICM.

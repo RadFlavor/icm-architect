@@ -23,25 +23,29 @@ The paper's canonical shape. The same sequence runs weekly or daily with differe
 
 ```
 workspace/
-├─ CLAUDE.md               identity + routing table
+├─ AGENTS.md               identity + routing table (or native equivalent)
 ├─ CONTEXT.md              the pipeline in one screen
+├─ icm.yaml                optional reliability policy
 ├─ stages/
-│  ├─ 01_research/   {CONTEXT.md, references/, output/}
-│  ├─ 02_script/     {CONTEXT.md, references/, output/}
-│  └─ 03_production/ {CONTEXT.md, references/, output/}
+│  ├─ 01_research/   {CONTEXT.md, references/}
+│  ├─ 02_script/     {CONTEXT.md, references/}
+│  └─ 03_production/ {CONTEXT.md, references/}
 ├─ _shared/                factory: voice.md, design-system.md
+├─ runs/                   isolated run artifacts, when configured
 └─ setup/questionnaire.md  configures the factory once
 ```
 
 **Defining moves:**
 - Handoff = one stage's `output/` is the next stage's input. A human edits the file in between; the next stage reads whatever is there.
 - Each contract carries a "load this / do NOT load that" inputs table.
-- `status` is answered by scanning `stages/*/output/` for files.
+- In a lightweight single-run workspace, status is confirmed from stage outputs and human gates. In a reliability-enabled workspace, run and artifact metadata distinguish present, approved, stale, blocked, and superseded.
 - Stage boundaries sit where the human naturally pauses to check — surfacing the judgment call (an outline, a structural plan) as an editable file *before* the expensive downstream work is the whole trick. Correction is cheapest at the earliest gate.
 
 **Expect a U-curve of human editing:** heavy at the first stage (direction-setting), light in the middle (constrained by both anchors), heavy at the last (aligning output with earlier decisions). Design the first and last outputs to be especially easy to edit.
 
 **Watch for:** stages that do two jobs (split them); contracts that restate reference material (point instead); pipelines built before the process has actually repeated (don't).
+
+For repeated, shared, or auditable pipelines, read [reliability.md](reliability.md). Choose `single` versus `isolated` deliberately; never use an ambiguous “latest run” as a write target.
 
 ## 2. Umbrella — a portfolio of pipelines
 

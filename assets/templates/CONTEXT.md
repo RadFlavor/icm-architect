@@ -11,4 +11,4 @@ The flow in one line: {plan it, make it, check it, ship it — in your workspace
 Factory (stable, every run): `_shared/{voice.md, rules.md, …}`
 Product (new each run): each stage's `output/`
 
-Status is whatever exists: a stage is COMPLETE when its `output/` holds files other than `.gitkeep`.
+Presence and approval are separate. Without the reliability layer, status is inferred from outputs and confirmed by the human gate. With `icm.yaml`, artifact metadata and input hashes are authoritative; an existing artifact may still be draft or stale.

@@ -2,6 +2,9 @@
 
 One job: {the single thing this stage does}.
 
+Contract version: {integer or Git commit}
+Gate: required {or auto / none — see references/reliability.md}
+
 ## Inputs
 - Working (this run): ../{NN-1}_{prev-stage}/output/{file}
 - Reference (every run): ../../_shared/{rules-file}.md
@@ -15,7 +18,12 @@ Do NOT load: {anything an eager agent would wrongly pull in — other stages' re
 3. {Hard limits worth restating: length, count, format.}
 
 ## Outputs
-- {artifact}.md → output/
+- Single-run policy: {artifact}.md → output/
+- Isolated-run policy: {artifact}.md → ../../runs/{run}/{NN}_{stage-name}/output/
+- Consequential outputs use artifact frontmatter or a `.meta.yaml` sidecar.
 
 ## Human check
 {One concrete act: read it aloud / verify the numbers against X / confirm the order survived. Edit the output in place — the next stage reads whatever is here.}
+
+## Exceptions
+Record skips, retries, branches, waivers, or blockers in the run's `exceptions/` folder. Never silently bypass this contract.
