@@ -2,6 +2,20 @@
 
 Notable changes to ICM Architect are recorded here.
 
+## Unreleased
+
+### Added
+
+- A lightweight framework-design guideline: deterministic systems handle reliable, repeatable work; AI handles bounded interpretation and judgment. The 60/30/10 split is a design prompt, not a quota.
+- Reliability checker coverage for isolated product paths, required artifact identity and provenance, completed-run approval, binary sidecars, exception records, open exceptions, and approximate context budgets.
+
+### Fixed
+
+- Unified pipeline handoffs under one product root for both single and isolated run policies.
+- Prevented valid exception records from being misclassified as artifacts.
+- Made checker installation and invocation explicit for generated workspaces.
+- Removed contradictory assumptions about optional manifests and canonical entry filenames.
+
 ## 2026-08-25 — Reliability layer
 
 ### Added

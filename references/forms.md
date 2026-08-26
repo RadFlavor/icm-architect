@@ -27,16 +27,17 @@ workspace/
 ├─ CONTEXT.md              the pipeline in one screen
 ├─ icm.yaml                optional reliability policy
 ├─ stages/
-│  ├─ 01_research/   {CONTEXT.md, references/}
-│  ├─ 02_script/     {CONTEXT.md, references/}
-│  └─ 03_production/ {CONTEXT.md, references/}
+│  ├─ 01_research/   {CONTEXT.md, references/, output/ for single policy}
+│  ├─ 02_script/     {CONTEXT.md, references/, output/ for single policy}
+│  └─ 03_production/ {CONTEXT.md, references/, output/ for single policy}
 ├─ _shared/                factory: voice.md, design-system.md
+├─ _system/                checker and generated system helpers
 ├─ runs/                   isolated run artifacts, when configured
 └─ setup/questionnaire.md  configures the factory once
 ```
 
 **Defining moves:**
-- Handoff = one stage's `output/` is the next stage's input. A human edits the file in between; the next stage reads whatever is there.
+- Handoff follows one policy for the whole workspace: `stages/<stage>/output/` under `single`, or `runs/<run-id>/<stage>/output/` under `isolated`. The next stage reads from that same product root.
 - Each contract carries a "load this / do NOT load that" inputs table.
 - In a lightweight single-run workspace, status is confirmed from stage outputs and human gates. In a reliability-enabled workspace, run and artifact metadata distinguish present, approved, stale, blocked, and superseded.
 - Stage boundaries sit where the human naturally pauses to check — surfacing the judgment call (an outline, a structural plan) as an editable file *before* the expensive downstream work is the whole trick. Correction is cheapest at the earliest gate.

@@ -105,6 +105,118 @@ class CheckerTests(unittest.TestCase):
             self.assertEqual(result.returncode, 1)
             self.assertIn("ERROR contract.auto-gate", result.stdout)
 
+    def test_terminal_none_gate_allowed_under_required_policy(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self.make_workspace(root)
+            contract = root / "stages/01_research/CONTEXT.md"
+            contract.write_text(contract.read_text().replace("Gate: required", "Gate: none"))
+            result = self.run_checker(root)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_complete_run_rejects_draft_artifact(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self.make_workspace(root)
+            artifact = root / "runs/2026-08-25-demo/01_research/output/result.md"
+            artifact.write_text(artifact.read_text().replace("status: approved", "status: draft"))
+            result = self.run_checker(root)
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("ERROR run.unapproved", result.stdout)
+
+    def test_artifact_identity_must_match_path(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self.make_workspace(root)
+            artifact = root / "runs/2026-08-25-demo/01_research/output/result.md"
+            artifact.write_text(artifact.read_text().replace("stage: 01_research", "stage: 02_wrong"))
+            result = self.run_checker(root)
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("ERROR artifact.stage", result.stdout)
+
+    def test_valid_exception_is_not_treated_as_artifact(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self.make_workspace(root)
+            exceptions = root / "runs/2026-08-25-demo/exceptions"
+            exceptions.mkdir()
+            (exceptions / "retry.md").write_text(
+                "---\nicm_exception: 1\nrun_id: 2026-08-25-demo\nstage: 01_research\n"
+                "type: retry\nstatus: resolved\nowner: Rad\ncreated_at: 2026-08-25T10:00:00Z\n"
+                "resolved_at: 2026-08-25T10:10:00Z\n---\n# Retry\n"
+            )
+            result = self.run_checker(root, "--strict")
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_binary_sidecar_is_validated(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self.make_workspace(root)
+            output = root / "runs/2026-08-25-demo/01_research/output"
+            (output / "clip.mp4").write_bytes(b"video")
+            (output / "clip.mp4.meta.yaml").write_text(
+                "icm_artifact: 1\nrun_id: 2026-08-25-demo\nstage: 01_research\n"
+                "status: approved\ncontract_version: 1\ncreated_at: 2026-08-25T10:30:00Z\n"
+                "approved_at: 2026-08-25T10:45:00Z\ninputs: []\n"
+            )
+            result = self.run_checker(root)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+            (output / "clip.mp4.meta.yaml").write_text(
+                (output / "clip.mp4.meta.yaml").read_text().replace("stage: 01_research", "stage: wrong")
+            )
+            result = self.run_checker(root)
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("ERROR artifact.stage", result.stdout)
+
+    def test_binary_artifact_requires_sidecar(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self.make_workspace(root)
+            output = root / "runs/2026-08-25-demo/01_research/output"
+            (output / "clip.mp4").write_bytes(b"video")
+            result = self.run_checker(root)
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("ERROR sidecar.missing", result.stdout)
+
+    def test_context_budget_is_enforced(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self.make_workspace(root)
+            manifest = root / "icm.yaml"
+            manifest.write_text(manifest.read_text() + "max_context_tokens: 1\n")
+            result = self.run_checker(root, "--strict")
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("WARN context.large", result.stdout)
+
+    def test_invalid_numeric_config_reports_without_crashing(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self.make_workspace(root)
+            manifest = root / "icm.yaml"
+            manifest.write_text(
+                manifest.read_text() + "max_entry_lines: nope\nmax_context_tokens: nope\n"
+            )
+            result = self.run_checker(root)
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("ERROR manifest.number", result.stdout)
+            self.assertNotIn("Traceback", result.stderr)
+
+    def test_complete_run_rejects_open_exception(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self.make_workspace(root)
+            exceptions = root / "runs/2026-08-25-demo/exceptions"
+            exceptions.mkdir()
+            (exceptions / "blocked.md").write_text(
+                "---\nicm_exception: 1\nrun_id: 2026-08-25-demo\nstage: 01_research\n"
+                "type: blocked\nstatus: open\nowner: Rad\ncreated_at: 2026-08-25T10:00:00Z\n"
+                "resolved_at:\n---\n# Blocked\n"
+            )
+            result = self.run_checker(root)
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("ERROR run.open-exception", result.stdout)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -36,13 +36,13 @@ Each run manifest records:
 - current stage
 - declared exceptions
 
-Stage outputs live at `runs/<run-id>/<NN_stage>/output/`. Contracts may use `{run}` as the run-id placeholder. A run id must be selected before execution; never infer “latest” when writing.
+Stage inputs and outputs live under one product root for the whole run. Under `isolated`, that root is `runs/<run-id>/`; a stage reads `runs/<run-id>/<previous-stage>/output/` and writes `runs/<run-id>/<current-stage>/output/`. Contracts may use `{run}` as the selected run-id placeholder. Never infer “latest” when writing.
 
 For `single`, outputs may remain at `stages/<NN_stage>/output/`. Provenance is still useful when stale work would be costly.
 
 ## Artifact provenance and approval
 
-Use YAML frontmatter on consequential Markdown outputs; use a same-basename `.meta.yaml` sidecar for binary or machine-owned artifacts.
+Use YAML frontmatter on consequential Markdown outputs. For a binary or machine-owned artifact such as `video.mp4`, use the adjacent sidecar `video.mp4.meta.yaml`.
 
 ```yaml
 ---
@@ -54,7 +54,7 @@ contract_version: 3
 created_at: 2026-08-25T19:40:00-04:00
 approved_at: 2026-08-25T20:05:00-04:00
 inputs:
-  - path: ../01_research/output/research.md
+  - path: ../../01_research/output/research.md
     sha256: "..."
 ---
 ```
@@ -77,21 +77,23 @@ Human checks remain concrete acts. A gate is state; the check says how a person 
 
 Normal flow stays visible through numbering. Do not encode exceptional control flow by renaming folders or silently skipping outputs.
 
-Copy `assets/templates/exception.md` into the run's `exceptions/` folder for a skip, retry, branch, waiver, or blocked dependency. It records the affected stage, reason, decision owner, downstream consequence, and resolution. A branch writes to a named folder inside the run; it does not mutate the factory contract unless the branch becomes the normal process.
+Copy `assets/templates/exception.md` into the run's `exceptions/` folder for a skip, retry, branch, waiver, or blocked dependency. Exception files use `icm_exception` metadata and are validated separately from artifacts. A branch writes to a named folder inside the run; it does not mutate the factory contract unless the branch becomes the normal process.
 
 ## Non-text payloads
 
-Markdown, YAML, and JSON are the preferred control interfaces, not a ban on appropriate storage. Large tables, media, databases, APIs, and Parquet files may hold payloads. Give each an adjacent Markdown description or `.meta.yaml` sidecar that names ownership, schema or interface, provenance, and how the current stage accesses it.
+Markdown, YAML, and JSON are the preferred control interfaces, not a ban on appropriate storage. Large tables, media, databases, APIs, and Parquet files may hold payloads. Give each file payload an `<artifact-name>.meta.yaml` sidecar; give external systems an adjacent Markdown descriptor naming ownership, interface, provenance, and access.
 
 ## Checker
 
 Run:
 
+When enabling reliability, copy this skill's `scripts/icm_check.py` into the workspace at `_system/icm_check.py`. From the workspace root, run:
+
 ```bash
-python3 scripts/icm_check.py <workspace>
-python3 scripts/icm_check.py <workspace> --strict
+python3 _system/icm_check.py .
+python3 _system/icm_check.py . --strict
 ```
 
-The checker is read-only and dependency-free. It checks routing size and drift, manifest values, stage contracts, declared input paths, broken relative Markdown links, run manifests, artifact metadata, approvals, and input hashes. It cannot prove that two prose files duplicate the same fact or that a human made a sound judgment; those remain walk-test questions.
+The checker is read-only and dependency-free. It checks routing size and drift, manifest values and context budget, stage contracts, declared input paths, broken relative Markdown links, run manifests, exception records, Markdown artifacts, binary sidecars, approvals, path identity, and input hashes. It cannot prove that two prose files duplicate the same fact or that a human made a sound judgment; those remain walk-test questions.
 
 Exit codes: `0` no errors, `1` structural or state errors, `2` invalid invocation. Warnings become errors under `--strict`.

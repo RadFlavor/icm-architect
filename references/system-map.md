@@ -28,13 +28,13 @@ Product language and file/type names often disagree. State both once in the cata
 
 Propose before writing. Prefer a `map/` shelf next to existing orientation (`developer-docs/`, `docs/`, vault root) so the subject’s entry file can add one routing row. Do not drop a map inside `src/` or scatter cards through the tree you are mapping.
 
-Entry files: edit `CLAUDE.md`. Generate `AGENTS.md` and `routing.md` as byte-identical twins in the same folder. Never hand-edit the twins. Tools that ignore `CLAUDE.md` still get the catalog.
+Entry files: use the subject's existing native entrypoint; otherwise prefer `AGENTS.md`. Declare one canonical file. Generate compatibility twins or make them short pointers—never maintain multiple entry files by hand.
 
 ## Target tree (smallest that carries the work)
 
 ```
 map/
-├─ CLAUDE.md              L0 catalog (twins: AGENTS.md, routing.md)
+├─ AGENTS.md              canonical L0 catalog (or the subject's native equivalent)
 ├─ CONTEXT.md             how to walk; the universes; name collisions
 ├─ _meta/schema.md        closed node types
 ├─ _templates/            object.md, process.md
@@ -103,8 +103,8 @@ After the first fill, rip the load-bearing claims again (especially Hits / Does 
 
 A cold agent, no memory of the subject:
 
-1. Open the subject’s entry file. Is the map one hop away?
-2. Open `map/CLAUDE.md`. Can it say what the colliding names mean without opening a card?
+1. Open the subject’s canonical entry file. Is the map one hop away?
+2. Open the map’s canonical entry file. Can it say what the colliding names mean without opening a card?
 3. Open one object card. Does it cite source, state the why, and give a first-order waterfall?
 4. From `effects/CONTEXT.md`, can it name what a stated change hits and what it does not?
 5. Follow one `See` link. Does it land on source, not another essay?

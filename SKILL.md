@@ -61,9 +61,9 @@ Real workspaces mix forms (a record library whose records are mini knowledge bun
 
 **4. Write the contracts.** Root `AGENTS.md` or `CLAUDE.md` (identity + routing table), root `CONTEXT.md` (the pipeline or schema definition), one `CONTEXT.md` per stage/hub folder, `setup/questionnaire.md` if the factory needs configuring per user. Write inputs as explicit file paths, split into working (this run) and reference (every run). Pick one canonical entry filename; any compatibility twin is generated or a pointer.
 
-**5. Add reliability only when earned.** For repeated, shared, or auditable workspaces, read [references/reliability.md](references/reliability.md), add `icm.yaml`, choose a run policy and gate policy, and use provenance metadata. Keep one-off workspaces lighter.
+**5. Add reliability only when earned.** For repeated, shared, or auditable workspaces, read [references/reliability.md](references/reliability.md), add `icm.yaml`, choose a run policy and gate policy, and use provenance metadata. Copy `scripts/icm_check.py` from this skill into the workspace at `_system/icm_check.py`. Keep one-off workspaces lighter.
 
-**6. Validate.** Run the walk test below. When the reliability layer is present—or the user asks for a checker—run `python3 scripts/icm_check.py <workspace>` and resolve errors before handoff.
+**6. Validate.** Run the walk test below. When the reliability layer is present—or the user asks for a checker—run `python3 _system/icm_check.py .` from the workspace root and resolve errors before handoff.
 
 ## Restructure mode
 
@@ -75,7 +75,7 @@ Real workspaces mix forms (a record library whose records are mini knowledge bun
 - **Catalog** — identity/routing (becomes or feeds `CLAUDE.md` / index files)
 - **Contract** — describes how a step works (becomes a `CONTEXT.md`)
 - **Factory** — stable reference (→ `_shared/`, `_system/`, or `references/`)
-- **Product** — run-specific artifacts (→ stage `output/` or record folders)
+- **Product** — run-specific artifacts (→ the selected single/isolated product root or record folders)
 - **Dead** — stale, duplicated, or superseded (→ propose `_archive/`, never silently delete)
 
 **4. Propose before moving.** Present the target tree and a migration map (old path → new path → role). Get approval. This is a human gate in a method built on human gates — honor it.
@@ -94,13 +94,14 @@ Validate any ICM — new or restructured — by walking it cold, as an agent wit
 - Is any routing file carrying content payload? Move the payload to a shelf; leave a pointer.
 - Is any fact stored in two places? Pick one home; link from the other.
 - Token check: entry file + one contract + its inputs should land in roughly 2k–8k tokens.
-- System map only: can a cold agent answer *what is X* and *what else moves if I change X* from `map/CLAUDE.md` plus one card? Extra checks are in [references/system-map.md](references/system-map.md).
+- System map only: can a cold agent answer *what is X* and *what else moves if I change X* from the map's canonical entry file plus one card? Extra checks are in [references/system-map.md](references/system-map.md).
 
 If a step fails, fix the structure — not by explaining more, but by moving or splitting files until the walk works.
 
 ## Guardrails
 
 - **Don't over-structure.** The ladder runs: chat → saved prompt/skill → folders + one agent. Only climb when the rung below is genuinely automated and repeating. A workspace for a thing done twice is scaffolding, not architecture.
+- **Deterministic vs. judgment.** When an ICM grows into a software framework, use deterministic systems for what must be reliable and repeatable; use AI where the work requires interpretation or judgment. AI should generally propose, while deterministic systems validate and commit. Treat 60% infrastructure / 30% orchestration / 10% AI as a loose design prompt, never a quota.
 - **Know where ICM loses.** Real-time multi-agent collaboration, high-concurrency multi-user serving, and automated mid-pipeline branching genuinely need framework code. ICM is for sequential, human-reviewed, repeatable work — which is most knowledge work, but not all of it.
 - **Anti-patterns seen in the wild:** duplicated entry files that drift (generate one from the other, or make one a pointer); schema documents that mandate names the actual files stopped using (update the schema or the files — pick one); hand-edits to generated indexes; workshop sessions that produce slides instead of structured data (every working session should end in an artifact the structure can hold); patterns declared top-down (one team complaining is a gripe — the same shape appearing three independent times is structure).
 
@@ -111,4 +112,4 @@ If a step fails, fix the structure — not by explaining more, but by moving or 
 - [references/system-map.md](references/system-map.md) — audit pipeline for the System map form. Read when that form is chosen.
 - [references/reliability.md](references/reliability.md) — run isolation, provenance, approval/staleness, exceptions, and checker use. Read for repeated, shared, audited, or checker-backed workspaces.
 - [assets/templates/](assets/templates/) — copyable starters for catalogs, contracts, manifests, runs, artifacts, exceptions, cards, schemas, and setup.
-- [scripts/icm_check.py](scripts/icm_check.py) — read-only structural and state validator; run after building or changing a reliability-enabled ICM.
+- [scripts/icm_check.py](scripts/icm_check.py) — read-only structural and state validator; copy to `_system/icm_check.py` in a reliability-enabled workspace.
